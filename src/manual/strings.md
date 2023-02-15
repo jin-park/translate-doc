@@ -1,46 +1,16 @@
-# [Strings](@id man-strings)
+# [스트링](@id man-strings)
 
-Strings are finite sequences of characters. Of course, the real trouble comes when one asks what
-a character is. The characters that English speakers are familiar with are the letters `A`, `B`,
-`C`, etc., together with numerals and common punctuation symbols. These characters are standardized
-together with a mapping to integer values between 0 and 127 by the [ASCII](https://en.wikipedia.org/wiki/ASCII)
-standard. There are, of course, many other characters used in non-English languages, including
-variants of the ASCII characters with accents and other modifications, related scripts such as
-Cyrillic and Greek, and scripts completely unrelated to ASCII and English, including Arabic, Chinese,
-Hebrew, Hindi, Japanese, and Korean. The [Unicode](https://en.wikipedia.org/wiki/Unicode) standard
-tackles the complexities of what exactly a character is, and is generally accepted as the definitive
-standard addressing this problem. Depending on your needs, you can either ignore these complexities
-entirely and just pretend that only ASCII characters exist, or you can write code that can handle
-any of the characters or encodings that one may encounter when handling non-ASCII text. Julia
-makes dealing with plain ASCII text simple and efficient, and handling Unicode is as simple and
-efficient as possible. In particular, you can write C-style string code to process ASCII strings,
-and they will work as expected, both in terms of performance and semantics. If such code encounters
-non-ASCII text, it will gracefully fail with a clear error message, rather than silently introducing
-corrupt results. When this happens, modifying the code to handle non-ASCII data is straightforward.
+스트링은 유한한 문자들의 나열이라고 할 수 있다. 하지만 문자가 정확히 무엇인지 정의를 하는 것은 어려운 문제이다. 영어를 아는 사람들에게 낯익은 문자들은 `A`, `B`, `C` 등의 알파벳, 그리고 숫자들과 문장부호일 것이다. 이 문자들은 0에서 127 사이의 숫자들에 대응하여 [아스키](https://en.wikipedia.org/wiki/ASCII)(ASCII) 코드로 표준화되어 있다. 물론, 강조부호가 있는 ASCII 문자들, 비슷한 형태를 가진 키릴, 그리스 문자, 그리고 영어와 전혀 관련없는 아랍어, 한자, 히브리어, 일본어, 그리고 한국어도 존재한다. 그래서 [유니코드](https://en.wikipedia.org/wiki/Unicode)는 이 수많은 문자들을 고려하여 만들어졌으며, 가장 권위적인 표준으로 여겨지고 있다. 용도에 따라 이 모든 것을 무시하고 아스키 문자들만 사용하거나, 그 외의 문자들을 사용하는 코드를 작성해도 된다. 즐리아는 아스키, 유니코드 문자들을 최대한 쉽고 효율적으로 다룰 수 있게 한다. 특히, C 언어의 방식대로 아스키 스트링을 다루는 코드 작성이 가능하며, 성능에 아무런 영향을 주지 않는다. 그런 코드에서 아스키 외의 문자들을 접하게 되면 적절한 에러 메시지가 표시되며, 예상밖의 결과가 산출될 걱정은 하지 않아도 된다. 그리고 이런 형태의 에러가 발생하더라도, 다른 종류의 문자를 처리하도록 코드를 수정하는 일은 간단하다.
 
-There are a few noteworthy high-level features about Julia's strings:
+줄리아의 스트링이 가지고 있는 주요 하이레벨 기능은 다음과 같다:
 
-  * The built-in concrete type used for strings (and string literals) in Julia is [`String`](@ref).
-    This supports the full range of [Unicode](https://en.wikipedia.org/wiki/Unicode) characters via
-    the [UTF-8](https://en.wikipedia.org/wiki/UTF-8) encoding. (A [`transcode`](@ref) function is
-    provided to convert to/from other Unicode encodings.)
-  * All string types are subtypes of the abstract type `AbstractString`, and external packages define
-    additional `AbstractString` subtypes (e.g. for other encodings).  If you define a function expecting
-    a string argument, you should declare the type as `AbstractString` in order to accept any string
-    type.
-  * Like C and Java, but unlike most dynamic languages, Julia has a first-class type for representing
-    a single character, called [`AbstractChar`](@ref). The built-in [`Char`](@ref) subtype of `AbstractChar`
-    is a 32-bit primitive type that can represent any Unicode character (and which is based
-    on the UTF-8 encoding).
-  * As in Java, strings are immutable: the value of an `AbstractString` object cannot be changed.
-    To construct a different string value, you construct a new string from parts of other strings.
-  * Conceptually, a string is a *partial function* from indices to characters: for some index values,
-    no character value is returned, and instead an exception is thrown. This allows for efficient
-    indexing into strings by the byte index of an encoded representation rather than by a character
-    index, which cannot be implemented both efficiently and simply for variable-width encodings of
-    Unicode strings.
+  * 줄리아에서 스트링과 스트링 리터럴은 내장된 실체 타입인 [`String`](@ref)으로 표현한다. `String`은 [UTF-8](https://en.wikipedia.org/wiki/UTF-8) 인코딩을 이용하며 유니코드 전체를 지원한다. ([`transcode`](@ref) 함수를 이용해 다른 유니코드 인코딩으로 변환할 수 있다.)
+  * 모든 스트링 타입은 추상 타입인 `AbstractString`의 하위 타입이며, 외부 패키지는 추가 하위 타입을 정의할 수 있다. (예: 다른 인코딩을 사용하는 스트링) 스트링을 매개변수로 하는 함수를 작성할 때 `AbstractString` 타입을 이용하면 모든 스트링을 입력값으로 받을 수 있다.
+  * C 언어, 자바와 비슷하지만 대부분의 다이나믹 언어와 다르게 줄리아에서 문자 타입은 퍼스트 클래스 타입이며 [`AbstractChar`](@ref)라고 부른다. 내장 타입인 [`Char`](@ref)는 `AbstractChar`의 하위 타입으로, 32비트 원시 타입이며 모든 유니코드 문자를 표현할 수 있다. (UTF-8 인코딩을 기반으로 하는 문자도 포함이다.)
+  * 자바와 같이 줄리아의 스트링은 불변 객체이다: 즉, `AbstractString` 객체의 값은 변할 수 없다. 다른 스트링 값을 생성하려면 새로운 스트링을 만들어야 한다.   
+  * 개념적으로, 스트링은 인덱스와 문자를 대응하는 **부분함수**라고 생각할 수 있다: 특정 인덱스는 대응하는 문자가 없으며 대신 예외가 발생한다. 이 구조는 인코딩된 데이터의 바이트 인덱싱을 가능하게 하며, 문자 단위 인덱싱과 달리 효율성 문제를 가지지 않는다. (유니코드 스트링은 가변 길이의 인코딩을 사용하기 때문에 문자 단위 인덱싱은 구현이 까다롭다.)
 
-## [Characters](@id man-characters)
+## [문자](@id man-characters)
 
 A `Char` value represents a single character: it is just a 32-bit primitive type with a special literal
 representation and appropriate arithmetic behaviors, and which can be converted
